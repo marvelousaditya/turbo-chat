@@ -5,9 +5,9 @@ import { createUserSchema, signInSchema, roomSchema } from "@repo/common/types";
 import { JWT_PASSWORD } from "@repo/backend-common/config";
 import { authMiddleware } from "./middleware";
 import bcrypt, { compare } from "bcrypt";
-// import cors from "cors";
+import cors from "cors";
 const app = express();
-// app.use(cors());
+app.use(cors());
 const saltRounds = 12;
 app.use(express.json());
 

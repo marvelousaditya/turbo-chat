@@ -33,7 +33,13 @@ wss.on("connection", (ws, req) => {
   }
   users.push({ userId, rooms: [], ws });
   ws.on("message", async (data) => {
-    const parsedData = JSON.parse(data as unknown as string);
+    let parsedData;
+    if (typeof data !== "string") {
+      parsedData = JSON.parse(data.toString());
+    } else {
+      parsedData = JSON.parse(data);
+    }
+    console.log(parsedData);
     if (parsedData.type === "join_room") {
       const user = users.find((u) => u.userId === userId);
       if (user) {
@@ -51,7 +57,8 @@ wss.on("connection", (ws, req) => {
         ws.send("user does not exist");
       }
     } else if (parsedData.type === "message") {
-      const { roomId, message } = parsedData;
+      const roomId = parsedData.roomId;
+      const message = parsedData.message;
       users.forEach((user) => {
         if (user.rooms.includes(roomId)) {
           user.ws.send(
@@ -62,7 +69,6 @@ wss.on("connection", (ws, req) => {
             }),
           );
         }
-        console.log(`Message sent to user in room ${roomId}: ${message}`);
       });
       try {
         await prisma.chat.create({
