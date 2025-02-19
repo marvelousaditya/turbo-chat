@@ -20,7 +20,7 @@ export async function initDraw(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   roomId: number,
-  socket: WebSocket,
+  socket: WebSocket
 ) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -56,7 +56,7 @@ export async function initDraw(
         type: "message",
         roomId,
         message: JSON.stringify({ shape }),
-      }),
+      })
     );
   });
 
@@ -80,7 +80,7 @@ export async function initDraw(
 function clearCanvas(
   existingShapes: Shape[],
   canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D
 ) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "rgba(0,0,0)";
@@ -95,14 +95,14 @@ function clearCanvas(
 }
 
 async function getExistingShapes(roomId: number) {
-  const response = await axios.get(`${HTTP_BACKEND}/chats/${roomId}`);
+  const response = await axios.get(`${HTTP_BACKEND}/chats/${roomId}`, {
+    withCredentials: true,
+  });
   const { messages } = response.data;
 
   const shapes: Shape[] = messages.map((x: { message: string }) => {
     const messageData = JSON.parse(x.message);
-    // console.log(messageData.shape);
     return messageData.shape;
   });
-  // console.log("shapes " + shapes);
   return shapes;
 }

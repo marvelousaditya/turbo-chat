@@ -9,6 +9,7 @@ interface usersIT {
   rooms: number[];
 }
 
+let compareWeb: String[] = [];
 const users: usersIT[] = [];
 function checkUser(token: string): string | null {
   try {
@@ -22,10 +23,13 @@ function checkUser(token: string): string | null {
   }
 }
 wss.on("connection", (ws, req) => {
-  const url = req.url || "";
-  const searchParams = new URLSearchParams(url.split("?")[1]);
-  const token = searchParams.get("token") || "";
-
+  compareWeb.push(JSON.stringify(ws));
+  const cookies = req.headers.cookie || "";
+  const token =
+    cookies
+      .split("; ")
+      .find((c: any) => c.startsWith("token="))
+      ?.split("=")[1] || "";
   const userId = checkUser(token);
   if (!userId) {
     ws.close();
@@ -39,7 +43,6 @@ wss.on("connection", (ws, req) => {
     } else {
       parsedData = JSON.parse(data);
     }
-    console.log(parsedData);
     if (parsedData.type === "join_room") {
       const user = users.find((u) => u.userId === userId);
       if (user) {
@@ -59,6 +62,17 @@ wss.on("connection", (ws, req) => {
     } else if (parsedData.type === "message") {
       const roomId = parsedData.roomId;
       const message = parsedData.message;
+      let i = 0;
+      for (i = 0; i < compareWeb.length; i++) {
+        if (
+          users[i]?.rooms.includes(roomId) &&
+          compareWeb[i] === users[i]?.ws
+        ) {
+          console.log("true");
+        } else {
+          console.log("false");
+        }
+      }
       users.forEach((user) => {
         if (user.rooms.includes(roomId)) {
           user.ws.send(
@@ -66,7 +80,7 @@ wss.on("connection", (ws, req) => {
               type: "chat",
               message,
               roomId,
-            }),
+            })
           );
         }
       });

@@ -7,7 +7,6 @@ import {
   Shapes,
   Cloud,
   ArrowRight,
-  Github,
 } from "lucide-react";
 import Link from "next/link";
 function Home() {

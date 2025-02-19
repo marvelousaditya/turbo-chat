@@ -6,10 +6,12 @@ import { JWT_PASSWORD } from "@repo/backend-common/config";
 import { authMiddleware } from "./middleware";
 import bcrypt, { compare } from "bcrypt";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 const app = express();
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 const saltRounds = 12;
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req: Request, res: Response) => {
   const { name, username, password } = req.body;
@@ -55,7 +57,9 @@ app.post("/signin", async (req: Request, res: Response) => {
       return;
     }
     const token = jwt.sign({ userId: userExists.id }, JWT_PASSWORD);
-    res.status(200).json({ message: "logged in successfully", token });
+    console.log(token);
+    res.cookie("token", token);
+    res.status(200).json({ message: "logged in successfully" });
   } catch (e: any) {
     res.status(400).json({ error: "some error occcured : " + e });
   }
@@ -88,7 +92,7 @@ app.post("/room", authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
-app.get("/chats/:roomId", async (req, res) => {
+app.get("/chats/:roomId", authMiddleware, async (req, res) => {
   const roomId = Number(req.params.roomId);
   try {
     const roomData = await prisma.chat.findMany({
@@ -108,7 +112,7 @@ app.get("/chats/:roomId", async (req, res) => {
   }
 });
 
-app.get("/room/:slug", async (req, res) => {
+app.get("/room/:slug", authMiddleware, async (req, res) => {
   const slug = req.params.slug;
   try {
     const roomData = await prisma.room.findFirst({

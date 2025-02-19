@@ -4,9 +4,9 @@ import { JWT_PASSWORD } from "@repo/backend-common/config";
 export function authMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
-  const token = req.headers["authorization"] || "";
+  const token = req.cookies.token || "";
   try {
     const decoded = jwt.verify(token, JWT_PASSWORD) as JwtPayload;
     req.userId = decoded.userId;

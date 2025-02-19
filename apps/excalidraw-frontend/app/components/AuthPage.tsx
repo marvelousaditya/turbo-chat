@@ -1,6 +1,8 @@
 "use client";
 import { Input } from "@repo/ui/input";
+import axios from "axios";
 import { useState } from "react";
+import { HTTP_BACKEND } from "@/config";
 
 export function AuthPage({ isSignin }: { isSignin: boolean }) {
   const [name, setName] = useState();
@@ -37,7 +39,31 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
           />
         </div>
         <div className="flex justify-center">
-          <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+          <button
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            onClick={async () => {
+              if (isSignin) {
+                await axios.post(
+                  `${HTTP_BACKEND}/signin`,
+                  {
+                    username,
+                    password,
+                  },
+                  { withCredentials: true }
+                );
+              } else {
+                await axios.post(
+                  `${HTTP_BACKEND}/signup`,
+                  {
+                    name,
+                    username,
+                    password,
+                  },
+                  { withCredentials: true }
+                );
+              }
+            }}
+          >
             {isSignin ? "Sign In" : "Sign Up"}
           </button>
         </div>
