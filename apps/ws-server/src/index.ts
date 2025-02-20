@@ -62,17 +62,6 @@ wss.on("connection", (ws, req) => {
     } else if (parsedData.type === "message") {
       const roomId = parsedData.roomId;
       const message = parsedData.message;
-      let i = 0;
-      for (i = 0; i < compareWeb.length; i++) {
-        if (
-          users[i]?.rooms.includes(roomId) &&
-          compareWeb[i] === users[i]?.ws
-        ) {
-          console.log("true");
-        } else {
-          console.log("false");
-        }
-      }
       users.forEach((user) => {
         if (user.rooms.includes(roomId)) {
           user.ws.send(
@@ -95,6 +84,12 @@ wss.on("connection", (ws, req) => {
       } catch (e) {
         return null;
       }
+    }
+  });
+  ws.on("close", () => {
+    const index = users.findIndex((user) => user.ws === ws);
+    if (index !== -1) {
+      users.splice(index, 1);
     }
   });
 });
